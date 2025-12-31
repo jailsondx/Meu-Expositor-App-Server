@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getAllFigures } from '../functions/AllFigures.js';
 import { getRecentFigures } from '../functions/RecentFigures.js';
+import { getCollectionById } from '../functions/getCollectionById.js';
 
 const router = Router();
 
@@ -23,6 +24,17 @@ router.get('/RecentFigures', async (req, res) => {
     handleError(res, error);
   }
 });
+
+router.get('/getCollectionById', async (req, res) => {
+  const collectionId = req.query.collectionId || '';
+  try {
+    const result = await getCollectionById(collectionId);
+    handleResponse(res, result);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
 
 
 // Métodos auxiliares para padronizar respostas e erros

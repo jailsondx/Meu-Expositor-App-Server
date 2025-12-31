@@ -1,12 +1,23 @@
 import { Router } from 'express';
-import { SearchFigures } from '../functions/SearchFigures.js';
+import { SearchFigures, SearchFiguresInCollection } from '../functions/SearchFigures.js';
 
 const router = Router();
 
-router.get('/SearchFigures', async (req, res) => {
-    const nameSearch = req.query.search || '';
+router.post('/SearchFigures', async (req, res) => {
+    const nameSearch = req.body.search;
   try {
     const result = await SearchFigures(nameSearch);
+    handleResponse(res, result);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+router.post('/SearchFiguresInCollection', async (req, res) => {
+    const nameSearch = req.body.search;
+    const collectionId = req.body.collectionId;
+  try {
+    const result = await SearchFiguresInCollection(nameSearch, collectionId);
     handleResponse(res, result);
   } catch (error) {
     handleError(res, error);

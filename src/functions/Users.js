@@ -73,9 +73,6 @@ export async function loginUser({ email, senha }) {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-
-    
-    console.log('Token:',token, 'do usuario:', user.id);
     
     return {
       success: true,

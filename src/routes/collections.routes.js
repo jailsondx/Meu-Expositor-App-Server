@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { auth } from '../middlewares/auth.js';
-import { createCollection, getUserCollections } from '../functions/Collections.js';
+import { addFigureToCollection, createCollection, getUserCollections } from '../functions/Collections.js';
+import { getFigureCollectionStatus } from '../functions/getFigureCollectionStatus.js';
 
 const router = Router();
 
@@ -24,6 +25,48 @@ router.get('/loadCollections', auth, async (req, res) => {
     handleError(res, error);
   }
 });
+
+
+
+router.get('/figure-status', auth, async (req, res) => {
+  const userId = req.userId;
+  const figureId = req.query.figureId;
+  try {
+    const result = await getFigureCollectionStatus(userId, figureId);
+    handleResponse(res, result);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+
+
+router.post('/:collectionId/add-figure', auth, async (req, res) => {
+  try {
+    const { collectionId } = req.params;
+    const { figureId } = req.body;
+    const userId = req.userId;
+
+    if (!collectionId || !figureId) {
+      return res.status(400).json({
+        success: false,
+        message: 'collectionId e figureId são obrigatórios',
+      });
+    }
+
+    const result = await addFigureToCollection(collectionId, figureId, userId);
+
+    handleResponse(res, result);
+  } catch (error) {
+    console.error('Erro na rota add-figure:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Erro interno ao adicionar figure à coleção',
+    });
+  }
+});
+
 
 
 /* ===== HELPERS ===== */
