@@ -1,6 +1,5 @@
 import { db } from '../database/connection.js';
 
-// Criar nova coleção
 export async function createCollection({ userId, name }) {
   if (!userId || !name) {
     return {
@@ -10,10 +9,21 @@ export async function createCollection({ userId, name }) {
     };
   }
 
+  // 🔹 Remove espaços extras no início e no fim
+  const trimmedName = name.trim();
+
+  // 🔹 Evita nomes vazios após o trim (ex: "   ")
+  if (trimmedName.length === 0) {
+    return {
+      success: false,
+      message: 'O nome da coleção não pode estar vazio',
+    };
+  }
+
   try {
     const [result] = await db.execute(
       'INSERT INTO ME_collections (user_id, name) VALUES (?, ?)',
-      [userId, name]
+      [userId, trimmedName]
     );
 
     return {
@@ -21,11 +31,10 @@ export async function createCollection({ userId, name }) {
       message: 'Coleção criada com sucesso',
       data: {
         id: result.insertId,
-        name,
+        name: trimmedName,
       },
     };
   } catch (error) {
-    
     return {
       success: false,
       message: 'Erro ao criar coleção',
@@ -33,6 +42,7 @@ export async function createCollection({ userId, name }) {
     };
   }
 }
+
 
 
 
@@ -68,6 +78,54 @@ export async function getUserCollections(userId) {
 }
 
 
+
+export async function getCollectionById(collectionId) {
+  if (!collectionId) {
+    return {
+      success: false,
+      message: 'CollectionId não informado',
+      error: 'Parâmetro ausente',
+    };
+  }
+
+  try {
+    const [rows] = await db.query(
+      `
+      SELECT 
+        f.id,
+        f.name,
+        f.brand_id,
+        b.name AS brand_name,
+        f.line_id,
+        l.name AS line_name,
+        f.price,
+        f.coin,
+        f.release_year,
+        f.image_url,
+        ci.quantity,
+        ci.notes
+      FROM ME_collection_items ci
+      INNER JOIN ME_figures f ON f.id = ci.figure_id
+      LEFT JOIN ME_brands b ON f.brand_id = b.id
+      LEFT JOIN ME_lines l ON f.line_id = l.id
+      WHERE ci.collection_id = ?
+      `,
+      [collectionId]
+    );
+
+    return {
+      success: true,
+      data: rows,
+    };
+  } catch (error) {
+    console.error('Erro ao carregar itens da coleção:', error);
+    return {
+      success: false,
+      message: 'Erro ao buscar itens da coleção',
+      error,
+    };
+  }
+}
 
 export async function addFigureToCollection(collectionId, figureId, userId) {
   try {
@@ -111,7 +169,7 @@ export async function addFigureToCollection(collectionId, figureId, userId) {
     if (exists.length > 0) {
       return {
         success: false,
-        message: 'Figure já existe nesta coleção',
+        message: 'Figure já registrada nesta coleção',
       };
     }
 
@@ -135,6 +193,53 @@ export async function addFigureToCollection(collectionId, figureId, userId) {
       success: false,
       message: 'Erro ao adicionar figure à coleção',
       error,
+    };
+  }
+}
+
+
+
+export async function getFigureCollectionStatus(userId, figureId) {
+  try {
+    const userCollections = await getUserCollections(userId);
+
+    // Se não houver coleções
+    if (!userCollections.success || userCollections.data.length === 0) {
+      return {
+        success: true,
+        message: 'Não Há coleções',
+        data: [],
+      };
+    }
+
+    // Extrai apenas os IDs das coleções
+    const collectionIds = userCollections.data.map(c => c.id);
+
+    const [rows] = await db.query(
+      `
+      SELECT 
+        c.id AS collection_id,
+        c.name AS collection_name
+      FROM ME_collection_items ci
+      LEFT JOIN ME_collections c ON ci.collection_id = c.id
+      WHERE ci.figure_id = ?
+        AND ci.collection_id IN (?)
+      `,
+      [figureId, collectionIds]
+    );
+
+    return {
+      success: true,
+      message: 'Coleções Encontradas',
+      data: rows,
+    };
+  } catch (error) {
+    console.error('Erro ao verificar figure na coleção:', error);
+
+    return {
+      success: false,
+      message: 'Erro ao verificar status da figure nas coleções',
+      error: error.message,
     };
   }
 }

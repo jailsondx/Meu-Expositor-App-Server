@@ -1,7 +1,8 @@
 import { Router } from 'express';
+import { auth } from '../middlewares/auth.js';
 import { getAllFigures } from '../functions/AllFigures.js';
 import { getRecentFigures } from '../functions/RecentFigures.js';
-import { getCollectionById } from '../functions/getCollectionById.js';
+import { getFigureCollectionStatus, getUserCollections, getCollectionById } from '../functions/Collections.js';
 
 const router = Router();
 
@@ -37,23 +38,58 @@ router.get('/getCollectionById', async (req, res) => {
 
 
 
+router.get('/getAllCollectionsUser', auth, async (req, res) => {
+  try {
+    const result = await getUserCollections(req.userId);
+    handleResponse(res, result);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+
+
+router.get('/figureStatus', auth, async (req, res) => {
+  const userId = req.userId;
+  const figureId = req.query.figureId;
+  try {
+    const result = await getFigureCollectionStatus(userId, figureId);
+    handleResponse(res, result);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
+
+
+
 // Métodos auxiliares para padronizar respostas e erros
 const handleResponse = (res, result) => {
   if (result.success) {
-    return res.status(200).json({ message: result.message, data: result.data });
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+      data: result.data
+    });
   } else {
-    return res.status(500).json({ message: result.message, error: result.error });
+    return res.status(400).json({
+      success: false,
+      message: result.message,
+      error: result.error
+    });
   }
 };
 
+
 const handleError = (res, error) => {
   console.error('Erro no processamento:', error);
-  /*
+
   return res.status(500).json({
+    success: false,
     message: 'Erro interno do servidor',
-    error: 'Erro desconhecido',
+    error: error.message || 'Erro desconhecido'
   });
-  */
 };
+
 
 export default router;
