@@ -53,7 +53,7 @@ export async function registerUser({ nome, email, senha }) {
 export async function loginUser({ email, senha }) {
   try {
     const [rows] = await db.execute(
-      'SELECT id, senha FROM ME_usuarios WHERE email = ?',
+      'SELECT id, nome, senha FROM ME_usuarios WHERE email = ?',
       [email]
     );
 
@@ -69,9 +69,11 @@ export async function loginUser({ email, senha }) {
     }
 
     const token = jwt.sign(
-      { userId: user.id },
+      { userId: user.id,
+        name: user.nome,
+       },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '1d' }
     );
     
     return {

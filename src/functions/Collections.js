@@ -1,6 +1,6 @@
 import { db } from '../database/connection.js';
 
-export async function createCollection({ userId, name }) {
+export async function createCollection({ userId, name, icon }) {
   if (!userId || !name) {
     return {
       success: false,
@@ -22,8 +22,8 @@ export async function createCollection({ userId, name }) {
 
   try {
     const [result] = await db.execute(
-      'INSERT INTO ME_collections (user_id, name) VALUES (?, ?)',
-      [userId, trimmedName]
+      'INSERT INTO ME_collections (user_id, name, icon) VALUES (?, ?, ?)',
+      [userId, trimmedName, icon]
     );
 
     return {
@@ -32,6 +32,7 @@ export async function createCollection({ userId, name }) {
       data: {
         id: result.insertId,
         name: trimmedName,
+        icon: icon,
       },
     };
   } catch (error) {
@@ -59,7 +60,7 @@ export async function getUserCollections(userId) {
 
   try {
     const [rows] = await db.execute(
-      'SELECT id, name FROM ME_collections WHERE user_id = ? ORDER BY id ASC',
+      'SELECT id, name, icon FROM ME_collections WHERE user_id = ? ORDER BY id ASC',
       [userId]
     );
 

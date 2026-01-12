@@ -1,6 +1,6 @@
 import { db } from '../database/connection.js';
 
-export async function getRecentFigures(req, res) {
+export async function getRecentFigures() {
   try {
     const [figures] = await db.query(`
       SELECT 

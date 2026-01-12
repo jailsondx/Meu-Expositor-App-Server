@@ -3,6 +3,7 @@ import { auth } from '../middlewares/auth.js';
 import { getAllFigures } from '../functions/AllFigures.js';
 import { getRecentFigures } from '../functions/RecentFigures.js';
 import { getFigureCollectionStatus, getUserCollections, getCollectionById } from '../functions/Collections.js';
+import { getFilters } from '../functions/SearchFigures.js';
 
 const router = Router();
 
@@ -25,6 +26,17 @@ router.get('/RecentFigures', async (req, res) => {
     handleError(res, error);
   }
 });
+
+
+router.get('/Filters', async (req, res) => {
+  try {
+    const result = await getFilters();
+    handleResponse(res, result);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
 
 router.get('/getCollectionById', async (req, res) => {
   const collectionId = req.query.collectionId || '';
@@ -59,6 +71,9 @@ router.get('/figureStatus', auth, async (req, res) => {
     handleError(res, error);
   }
 });
+
+
+
 
 
 

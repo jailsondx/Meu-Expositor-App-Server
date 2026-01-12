@@ -7,8 +7,10 @@ const router = Router();
 
 router.post('/SearchFigures', async (req, res) => {
   const nameSearch = req.body.search;
+  const brandId = req.body.brandId
+  const lineId = req.body.lineId
   try {
-    const result = await SearchFigures(nameSearch);
+    const result = await SearchFigures(nameSearch, brandId, lineId);
     handleResponse(res, result);
   } catch (error) {
     console.error('Erro na rota SearchFigures:', error);
@@ -17,10 +19,13 @@ router.post('/SearchFigures', async (req, res) => {
 });
 
 router.post('/SearchFiguresInCollection', async (req, res) => {
+  console.log('chamada');
   const nameSearch = req.body.search;
   const collectionId = req.body.collectionId;
+  const brandId = req.body.brandId
+  const lineId = req.body.lineId
   try {
-    const result = await SearchFiguresInCollection(nameSearch, collectionId);
+    const result = await SearchFiguresInCollection(nameSearch, collectionId, brandId, lineId);
     handleResponse(res, result);
   } catch (error) {
     console.error('Erro na rota SearchFiguresInCollection:', error);
@@ -28,13 +33,12 @@ router.post('/SearchFiguresInCollection', async (req, res) => {
   }
 });
 
-
-
 router.post('/createCollection', auth, async (req, res) => {
   try {
     const result = await createCollection({
       userId: req.userId,
       name: req.body.name,
+      icon: req.body.icon,
     });
     handleResponse(res, result);
   } catch (error) {
