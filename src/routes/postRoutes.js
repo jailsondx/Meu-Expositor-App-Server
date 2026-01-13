@@ -1,16 +1,19 @@
 import { Router } from 'express';
 import { auth } from '../middlewares/auth.js';
-import { SearchFigures, SearchFiguresInCollection } from '../functions/SearchFigures.js';
-import { addFigureToCollection, createCollection } from '../functions/Collections.js';
+import { SearchFigures, SearchFiguresInCollection } from '../functions/Select/SearchFigures.js';
+import { CreateCollection } from '../functions/Insert/CreateCollection.js';
+import { addFigureToCollection } from '../functions/Insert/addFigureToCollection.js';
 
 const router = Router();
 
-router.post('/SearchFigures', async (req, res) => {
+router.post('/SearchFigures', auth, async (req, res) => {
   const nameSearch = req.body.search;
   const brandId = req.body.brandId
   const lineId = req.body.lineId
+  const page = req.body.page
+  const limit = req.body.limit
   try {
-    const result = await SearchFigures(nameSearch, brandId, lineId);
+    const result = await SearchFigures(nameSearch, brandId, lineId, page, limit);
     handleResponse(res, result);
   } catch (error) {
     console.error('Erro na rota SearchFigures:', error);
@@ -18,14 +21,15 @@ router.post('/SearchFigures', async (req, res) => {
   }
 });
 
-router.post('/SearchFiguresInCollection', async (req, res) => {
-  console.log('chamada');
+router.post('/SearchFiguresInCollection', auth, async (req, res) => {
   const nameSearch = req.body.search;
   const collectionId = req.body.collectionId;
   const brandId = req.body.brandId
   const lineId = req.body.lineId
+  const page = req.body.page
+  const limit = req.body.limit
   try {
-    const result = await SearchFiguresInCollection(nameSearch, collectionId, brandId, lineId);
+    const result = await SearchFiguresInCollection(nameSearch, collectionId, brandId, lineId, page, limit);
     handleResponse(res, result);
   } catch (error) {
     console.error('Erro na rota SearchFiguresInCollection:', error);
@@ -33,25 +37,21 @@ router.post('/SearchFiguresInCollection', async (req, res) => {
   }
 });
 
-router.post('/createCollection', auth, async (req, res) => {
+router.post('/CreateCollection', auth, async (req, res) => {
   try {
-    const result = await createCollection({
+    const result = await CreateCollection({
       userId: req.userId,
       name: req.body.name,
       icon: req.body.icon,
     });
     handleResponse(res, result);
   } catch (error) {
-    console.error('Erro na rota createCollection:', error);
+    console.error('Erro na rota CreateCollection:', error);
     return handleError(res, error);
   }
-
 });
 
-
-
-
-router.post('/:collectionId/add-figure', auth, async (req, res) => {
+router.post('/:collectionId/addFigure', auth, async (req, res) => {
   try {
     const { collectionId } = req.params;
     const { figureId } = req.body;
@@ -65,7 +65,6 @@ router.post('/:collectionId/add-figure', auth, async (req, res) => {
     }
 
     const result = await addFigureToCollection(collectionId, figureId, userId);
-    console.log(result);
     handleResponse(res, result);
   } catch (error) {
     console.error('Erro na rota add-figure:', error);
@@ -73,6 +72,11 @@ router.post('/:collectionId/add-figure', auth, async (req, res) => {
     return handleError(res, error);
   }
 });
+
+
+
+
+
 
 
 // Métodos auxiliares para padronizar respostas e erros

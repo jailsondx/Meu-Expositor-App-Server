@@ -1,4 +1,4 @@
-import { db } from '../database/connection.js';
+import { db } from '../../database/connection.js';
 
 export async function getFilters() {
   try {
@@ -38,14 +38,12 @@ export async function getFilters() {
 }
 
 
-export async function SearchFigures(nameSearch, brandId, lineId) {
+export async function SearchFigures(nameSearch, brandId, lineId, page = 1, limit = 20) {
   try {
-    // 1️⃣ validação: pelo menos um filtro deve existir
     if (!nameSearch && !brandId && !lineId) {
       return {
         success: false,
-        message: 'Informe ao menos um filtro ou nome para realizar a busca',
-        error: 'NO_FILTERS',
+        message: 'Informe ao menos um filtro',
         data: [],
       };
     }
@@ -53,27 +51,27 @@ export async function SearchFigures(nameSearch, brandId, lineId) {
     const where = [];
     const params = [];
 
-    // 2️⃣ filtros dinâmicos
     if (nameSearch) {
-      where.push('f.name LIKE ?');
+      where.push('LOWER(f.name) LIKE LOWER(?)');
       params.push(`%${nameSearch}%`);
     }
 
     if (brandId) {
       where.push('f.brand_id = ?');
-      params.push(brandId);
+      params.push(Number(brandId));
     }
 
     if (lineId) {
       where.push('f.line_id = ?');
-      params.push(lineId);
+      params.push(Number(lineId));
     }
+
+    const offset = (page - 1) * limit;
 
     const whereClause = where.length
       ? `WHERE ${where.join(' AND ')}`
       : '';
 
-    // 3️⃣ query final
     const [figures] = await db.query(
       `
         SELECT 
@@ -91,21 +89,21 @@ export async function SearchFigures(nameSearch, brandId, lineId) {
         LEFT JOIN ME_brands b ON f.brand_id = b.id
         LEFT JOIN ME_lines l ON f.line_id = l.id
         ${whereClause}
+        ORDER BY f.name ASC
+        LIMIT ? OFFSET ?
       `,
-      params
+      [...params, limit, offset]
     );
 
     return {
       success: true,
-      message: 'Pesquisa realizada com sucesso',
       data: figures,
     };
   } catch (error) {
-    console.error('Erro ao carregar Pesquisa de Figure:', error);
-
+    console.error('Erro SearchFigures:', error);
     return {
       success: false,
-      message: 'Erro ao buscar figuras',
+      message: 'Erro interno',
       data: [],
     };
   }

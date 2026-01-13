@@ -1,13 +1,10 @@
 import { Router } from 'express';
 import { auth } from '../middlewares/auth.js';
-import { getAllFigures } from '../functions/AllFigures.js';
-import { getRecentFigures } from '../functions/RecentFigures.js';
-import { getFigureCollectionStatus, getUserCollections, getCollectionById } from '../functions/Collections.js';
-import { getFilters } from '../functions/SearchFigures.js';
+import { getAllFigures, getRecentFigures } from '../functions/Select/getFigures.js';
+import { getFilters } from '../functions/Select/SearchFigures.js';
+import { getCollectionById, getFigureCollectionStatus, getUserCollections } from '../functions/Select/getCollections.js';
 
 const router = Router();
-
-//router.get('/AllFigures', getAllFigures);
 
 router.get('/AllFigures', async (req, res) => {
   try {
