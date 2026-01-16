@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { auth } from '../middlewares/auth.js';
 import { removeFigureToCollection } from '../functions/Delete/deleteFigureToCollection.js';
+import { deleteCollection } from '../functions/Delete/deleteCollection.js';
 
 const router = Router();
 
@@ -21,6 +22,28 @@ router.delete('/:collectionId/removeFigure', auth, async (req, res) => {
     handleResponse(res, result);
   } catch (error) {
     console.error('Erro na rota removeFigure:', error);
+
+    return handleError(res, error);
+  }
+});
+
+
+router.delete('/:collectionId/deleteCollection', auth, async (req, res) => {
+  try {
+    const { collectionId } = req.params;
+    const userId = req.userId;
+
+    if (!collectionId) {
+      return res.status(400).json({
+        success: false,
+        message: 'collectionId são obrigatórios',
+      });
+    }
+
+    const result = await deleteCollection(collectionId, userId);
+    handleResponse(res, result);
+  } catch (error) {
+    console.error('Erro na rota deleteCollection:', error);
 
     return handleError(res, error);
   }
