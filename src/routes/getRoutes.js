@@ -1,12 +1,10 @@
 import { Router } from 'express';
 import { auth } from '../middlewares/auth.js';
-import { getAllFigures } from '../functions/AllFigures.js';
-import { getRecentFigures } from '../functions/RecentFigures.js';
-import { getFigureCollectionStatus, getUserCollections, getCollectionById } from '../functions/Collections.js';
+import { getAllFigures, getRecentFigures } from '../functions/Select/getFigures.js';
+import { getFilters } from '../functions/Select/SearchFigures.js';
+import { getCollectionById, getFigureCollectionStatus, getUserCollections } from '../functions/Select/getCollections.js';
 
 const router = Router();
-
-//router.get('/AllFigures', getAllFigures);
 
 router.get('/AllFigures', async (req, res) => {
   try {
@@ -25,6 +23,17 @@ router.get('/RecentFigures', async (req, res) => {
     handleError(res, error);
   }
 });
+
+
+router.get('/Filters', async (req, res) => {
+  try {
+    const result = await getFilters();
+    handleResponse(res, result);
+  } catch (error) {
+    handleError(res, error);
+  }
+});
+
 
 router.get('/getCollectionById', async (req, res) => {
   const collectionId = req.query.collectionId || '';
@@ -59,6 +68,9 @@ router.get('/figureStatus', auth, async (req, res) => {
     handleError(res, error);
   }
 });
+
+
+
 
 
 
