@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 
+import testRoutes from './routes/testRoutes.js';
 import authRoutes from './routes/auth.routes.js';
 import getRoutes from './routes/getRoutes.js';
 import postRoutes from './routes/postRoutes.js';
@@ -14,6 +15,8 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('API MEU-EXPOSITOR rodando 🚀');
 });
+
+app.use('/', testRoutes);
 
 app.use('/auth', authRoutes);
 app.use('/get', getRoutes);

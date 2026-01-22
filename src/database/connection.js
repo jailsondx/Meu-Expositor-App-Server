@@ -1,28 +1,44 @@
 import mysql from 'mysql2/promise';
-import 'dotenv/config';
+import dotenv from 'dotenv';
 
-let db;
+dotenv.config();
 
-export default async function TestDatabase() {
-  try {
-    db = await mysql.createPool({
+let pool;
+
+// cria o pool uma única vez
+function createPool() {
+  if (!pool) {
+    pool = mysql.createPool({
       host: process.env.DB_HOST,
-      user: process.env.DB_USER,   
+      user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       port: process.env.DB_PORT,
-    });
 
-    // Teste de conexão
-    const connection = await db.getConnection();
-    console.log('✅ Conexão com o banco de dados bem-sucedida!');
-    connection.release();
-  } catch (error) {
-    console.error('❌ Erro ao conectar no banco de dados:', error);
+      waitForConnections: true,
+      connectionLimit: 5,
+      queueLimit: 0,
+
+      // Railway exige SSL
+      ssl: {
+        rejectUnauthorized: false,
+      },
+
+      connectTimeout: 10000,
+    });
   }
+  return pool;
 }
 
-TestDatabase()
+// mantém compatibilidade com seu código atual
+const db = createPool();
 
+// função opcional de teste
+async function testDatabaseConnection() {
+  const connection = await db.getConnection();
+  connection.release();
+  console.log('✅ Banco de dados conectado');
+  return true;
+}
 
-export { db };
+export { db, testDatabaseConnection };
