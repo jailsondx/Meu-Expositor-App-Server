@@ -13,7 +13,7 @@ app.use(express.json());
 
 // rota base /
 app.get('/', (req, res) => {
-  res.send('API rodando 🚀');
+  res.send('API MEU-EXPOSITOR rodando 🚀');
 });
 
 app.use('/auth', authRoutes);
