@@ -12,3 +12,5 @@ app.use(cors());
 app.listen(process.env.PORT, '0.0.0.0', () => {
   console.log(`\n🚀 Backend rodando na porta: ${process.env.PORT}\n🌐 database: ${process.env.DB_HOST}`);
 });
+
+//ARQUIVO PARA RODAR O BACKEND LOCALMENTE NO PC PARA DESENVOLVIMENTO

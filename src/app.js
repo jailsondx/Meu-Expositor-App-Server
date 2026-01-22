@@ -11,7 +11,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// rota base /
 app.get('/', (req, res) => {
   res.send('API MEU-EXPOSITOR rodando 🚀');
 });
@@ -22,3 +21,5 @@ app.use('/post', postRoutes);
 app.use('/delete', deleteRoutes);
 
 export default app;
+
+//ARQUIVO PRINCIPAL DA APLICAÇÃO
